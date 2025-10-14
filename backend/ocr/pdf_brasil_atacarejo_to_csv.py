@@ -145,59 +145,76 @@ def looks_like_attr(line: str) -> bool:
 
 
 def parse_items_from_pages(pages: List[str]) -> List[dict]:
+    """
+    Estratégia por blocos:
+    - cada ocorrência de preço marca o início de um novo item;
+    - todas as linhas entre um preço e o próximo pertencem ao mesmo bloco;
+    - dentro do bloco, ignoramos linhas claramente inúteis (unidades isoladas, avisos);
+    - resultado: mais itens preservados, menos vazamento entre produtos.
+    """
     items: List[dict] = []
-    for page_idx, page in enumerate(pages, start=1):
-        raw = page.splitlines()
-        lines = [normalize_line(l) for l in raw if normalize_line(l)]
-        i = 0
-        while i < len(lines):
-            line = lines[i]
-            m = PRICE_RE.search(line)
-            if not m:
-                i += 1
-                continue
 
-            price_txt = m.group(0)
+    for page_idx, page in enumerate(pages, start=1):
+        raw_lines = page.splitlines()
+        lines = [normalize_line(l) for l in raw_lines if normalize_line(l)]
+
+        # índices das linhas que contêm preço
+        price_indices = []
+        for i, ln in enumerate(lines):
+            m = PRICE_RE.search(ln)
+            if m:
+                price_indices.append((i, m.group(0)))
+
+        for k, (i_price, price_txt) in enumerate(price_indices):
+            # define o bloco do item (do preço atual até o próximo preço)
+            i_next = price_indices[k + 1][0] if k + 1 < len(price_indices) else len(lines)
+            bloco = lines[i_price:i_next]
+
+            # preço → float
             preco = brl_to_float(price_txt)
 
-            # nome: pode haver algo na própria linha do preço
-            nome_linhas: List[str] = []
-            inline_name = PRICE_RE.sub("", line).strip()
-            if inline_name and not EXCLUDE_PAT.search(inline_name) and not looks_like_attr(inline_name):
-                nome_linhas.append(inline_name)
+            # nome pode estar junto do preço
+            inline_name = PRICE_RE.sub("", bloco[0]).strip()
+            nome_partes: List[str] = []
 
-            # segue olhando pra frente, pulando atributos/ruído e parando antes do próximo preço
-            j = i + 1
-            while j < len(lines) and len(nome_linhas) < 3:
-                nxt = lines[j]
-                if PRICE_RE.search(nxt):
-                    break
-                if EXCLUDE_PAT.search(nxt) or UNIT_SOLO_PAT.search(nxt) or looks_like_attr(nxt):
-                    j += 1
+            if inline_name and not EXCLUDE_PAT.search(inline_name) and not UNIT_SOLO_PAT.search(inline_name):
+                nome_partes.append(inline_name)
+
+            # linhas seguintes no mesmo bloco
+            for ln in bloco[1:]:
+                if not ln:
                     continue
-                nome_linhas.append(nxt)
-                j += 1
+                # se aparecer outro preço (por segurança), encerra
+                if PRICE_RE.search(ln):
+                    break
+                # ignora banners e unidades soltas
+                if EXCLUDE_PAT.search(ln) or UNIT_SOLO_PAT.search(ln):
+                    continue
+                nome_partes.append(ln)
 
-            nome = clean_product_name(" ".join(nome_linhas))
+            # junta e limpa
+            nome = clean_product_name(" ".join(nome_partes))
+            # corta textos absurdamente longos (OCR com colagem)
+            if len(nome) > 180:
+                nome = nome[:180].rsplit(" ", 1)[0].strip()
 
             if nome:
                 items.append({
                     "pagina": page_idx,
-                    "linha": i + 1,
+                    "linha": i_price + 1,
                     "produto": nome,
                     "preco_brl": price_txt,
                     "preco": preco,
                 })
 
-            i = j if j > i else i + 1
-
-    # dedup por (pagina, produto, preco)
+    # remove duplicatas simples
     uniq = {}
     for it in items:
-        k = (it["pagina"], it["produto"].lower(), it["preco_brl"])
-        if k not in uniq:
-            uniq[k] = it
+        key = (it["pagina"], it["produto"].lower(), it["preco_brl"])
+        if key not in uniq:
+            uniq[key] = it
     return list(uniq.values())
+
 
 
 
