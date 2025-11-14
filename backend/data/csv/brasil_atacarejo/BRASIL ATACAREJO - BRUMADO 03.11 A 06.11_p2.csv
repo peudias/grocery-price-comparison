@@ -1,17 +1,16 @@
 ordem,produto,preco_brl,unidade
-1,Nawville Manteiga com,"15,80",
-2,Naverill Limicr Nawville Fradicional FIBRAS Manteiga com Sal,"17,80",
-3,Italac Pão de Integral Limicr Forma Fradicional Tradicional FIBRAS Limiar 400g LEITE EM PO INTEGRAL,"3,98",
-4,Italac Italac Integral Integral Site BITE EM POINTEGRAL INTEGRAL Leite,"6,98",
-5,Italac Italac Site Contende Site Contende Smidesstade Leite Condensado,"5,28",
-6,Dona Mira Acteur pistal,"3,48",
-7,URBANO URBAND,"4,58",
-8,ANDORINHA,"5,48",
-9,finna Tradicional Farinha De,"4,18",
-10,Fugini Petyan Mika Massa Comum Petyan 400g Milho Verde,"1,78",
-11,Fugini Fugini Maka Mika,"2,78",
-12,"Extra Virgem Comum Andorinha Petyan 500ml 400g Farinha De Trigo Milho Verde Fugini 33,800 Finna Tradicional Sem Sachê 170g Fermento","0,00",
-13,FORDY Mineral s / Gás Sabão em,"0,78",
-14,Ype Owny Hals Ype Sabão em Barra,"9,80",
-15,Pneu Dunlop Sp Touring / 65R14 R1 82T,"298,00",
-16,Pneu Dunlop Touring / 70R13 R1 79T / 70R13 R1 79T,"278,00",
+1,Pão de Forma Tradicional Limiar 400g,"3,98",cada
+2,Leite Condensado Italac 395g,"5,28",un
+3,Manteiga com Sal Natville 500g,"17,80",cada
+4,Carne Suína Pururuca,"15,80",kg
+5,Leite em Pó Integral Italac Sachê 200g,"6,98",cada
+6,Açúcar Cristal Dona Mira 1kg,"3,48",cada
+7,Arroz Agulhinha Tipo 1 Tio Urbano,"4,58",kg
+8,Farinha De Trigo Finna Tradicional Sem Fermento,"4,18",kg
+9,Milho Verde Fugini Sachê 170g,"2,78",cada
+10,Feijão Carioca Vida Cores 1kg,"5,48",kg
+11,Massa Comum Petyan 400g,"1,78",pct
+12,Água Mineral s/ Gás Águas do Porto 510ml,"0,78",pct
+13,Pneu Dunlop Touring 175/70R13 R1 79T 165/70R13 R1 79T,"278,00",cada
+14,Pneu Dunlop Sp Touring 175/65R14 R1 82T,"298,00",cada
+15,Sabão em Barra Ypê Glicerinado Ypê 160g c/ 5,"9,80",cada
