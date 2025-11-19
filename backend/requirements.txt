@@ -5,3 +5,4 @@ pandas==2.2.2
 openai
 google-cloud-vision
 python-dotenv
+ultralytics>=8.3.0
