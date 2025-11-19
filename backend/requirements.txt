@@ -1,8 +1,6 @@
 gdown==5.2.0
 pdf2image
 Pillow
-pandas==2.2.2
-openai
-google-cloud-vision
-python-dotenv
+pytesseract
 ultralytics>=8.3.0
+opencv-python
