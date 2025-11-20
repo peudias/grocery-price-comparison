@@ -1,107 +1,163 @@
 from __future__ import annotations
 from pathlib import Path
-from typing import List
+from typing import List, Dict, Tuple
 import sys
-import re
-
 import gdown
 from pdf2image import convert_from_path
 
-# ========= DRIVE DOS FOLHETOS DO BRASIL ATACAREJO =========
-FOLDER_URL = "https://drive.google.com/drive/folders/1mzp4QQj7Ep1GRvjy4tRHbLfqu-_Ts7Ns"
+CONFIG_PATH = Path("backend/src/download/config_brasil_atacarejo.txt")
 
-# Pastas de dados
-DATA_RAW = Path("backend/data/raw/brasil_atacarejo");
-DATA_PROCESSED = Path("backend/data/processed/brasil_atacarejo");
+# 1. Leitura do arquivo de configuração (geral + cidades)
+def carregar_config(config_path: Path) -> Tuple[str, Path, Path, Dict[str, bool]]:
+    """
+    Lê o arquivo de configuração e retorna:
+    - folder_url (str)
+    - data_raw (Path)
+    - data_processed (Path)
+    - flags_cidades (dict)
+    """
+    if not config_path.exists():
+        print(f"[ERRO] Arquivo de configuração não encontrado: {config_path}")
+        sys.exit(1)
 
-# ========= CIDADES DE INTERESSE =========
-PADRAO_CIDADE = re.compile(
-    r"(BRUMADO|VIT[ÓO]RIA\s+DA\s+CONQUISTA)",
-    flags=re.IGNORECASE,
-)
+    folder_url = None
+    data_raw = None
+    data_processed = None
+    flags_cidades: Dict[str, bool] = {}
 
+    with config_path.open("r", encoding="utf-8") as f:
+        for linha in f:
+            linha = linha.strip()
+
+            if not linha or linha.startswith("#"):
+                continue
+
+            if "=" not in linha:
+                print(f"[AVISO] Linha inválida no config: {linha}")
+                continue
+
+            chave_raw, valor_raw = linha.split("=", 1)
+            chave = chave_raw.strip().upper()
+            valor = valor_raw.strip()
+
+            # Configurações gerais
+            if chave == "FOLDER_URL":
+                folder_url = valor
+                continue
+
+            if chave == "DATA_RAW":
+                data_raw = Path(valor)
+                continue
+
+            if chave == "DATA_PROCESSED":
+                data_processed = Path(valor)
+                continue
+
+            # Flags de cidades (TRUE/FALSE)
+            valor_bool = valor.upper()
+            if valor_bool in {"TRUE", "1", "SIM", "YES"}:
+                flags_cidades[chave] = True
+            elif valor_bool in {"FALSE", "0", "NAO", "NÃO", "NO"}:
+                flags_cidades[chave] = False
+            else:
+                print(f"[AVISO] Valor inválido: {valor_raw} ({chave})")
+
+    if not folder_url or data_raw is None or data_processed is None:
+        print("[ERRO] Configurações gerais incompletas no arquivo de configuração.")
+        sys.exit(1)
+
+    return folder_url, data_raw, data_processed, flags_cidades
+
+# 2. Decisão de manter/remover PDF
+def deve_manter_pdf(nome_pdf: str, flags: Dict[str, bool]) -> bool:
+    nome = nome_pdf.upper()
+
+    for cidade, flag in flags.items():
+        if cidade in nome:
+            return flag
+
+    return False
+
+# 3. Conversão e download
 def converter_pdf_para_png(pdf_path: Path, pasta_destino: Path) -> List[Path]:
-    """
-    Converte um PDF em imagens PNG (uma por página).
-    """
     pasta_destino.mkdir(parents=True, exist_ok=True)
     imagens = convert_from_path(pdf_path, dpi=200)
 
-    caminhos_png: List[Path] = []
+    saidas = []
     for i, img in enumerate(imagens, start=1):
         nome_png = pdf_path.stem + f"_p{i}.png"
-        caminho_png = pasta_destino / nome_png
-        img.save(caminho_png, "PNG")
-        caminhos_png.append(caminho_png)
-        print(f"[OK] Gerado: {caminho_png.name}")
+        destino = pasta_destino / nome_png
+        img.save(destino, "PNG")
+        print(f"[OK] Gerado: {destino}")
+        saidas.append(destino)
 
-    return caminhos_png
+    return saidas
     
-def baixar_pdfs_brasil_atacarejo() -> List[Path]:
-    """
-    Baixa todos os PDFs da pasta do Drive,
-    filtra apenas BRUMADO e VITÓRIA DA CONQUISTA,
-    e remove o restante.
-    Retorna a lista de PDFs mantidos.
-    """
-    DATA_RAW.mkdir(parents=True, exist_ok=True)
-
+def baixar_pdfs(folder_url: str, data_raw: Path) -> List[Path]:
     print("[INFO] Baixando PDFs do Brasil Atacarejo...")
-    files = gdown.download_folder(
-        url=FOLDER_URL,
-        output=str(DATA_RAW),
+
+    data_raw.mkdir(parents=True, exist_ok=True)
+
+    arquivos = gdown.download_folder(
+        url=folder_url,
+        output=str(data_raw),
         quiet=False,
         use_cookies=False,
         remaining_ok=True,
     ) or []
 
-    pdfs = [Path(p) for p in files if str(p).lower().endswith(".pdf")]
+    return [Path(p) for p in arquivos if p.lower().endswith(".pdf")]
+
+# 4. Pipeline completo
+def run():
+    folder_url, data_raw, data_processed, flags_cidades = carregar_config(CONFIG_PATH)
+
+    # Verifica se existe pelo menos uma cidade TRUE
+    cidades_ativas = [c for c, v in flags_cidades.items() if v]
+    if not cidades_ativas:
+        print("[ERRO] Nenhuma cidade está marcada como TRUE no arquivo de configuração.")
+        print("       Edite backend/src/download/brasil_atacarejo_config.txt e marque pelo menos uma cidade =TRUE.")
+        return
+
+    print("\n[INFO] CONFIGURAÇÕES CARREGADAS:")
+    print(f"   FOLDER_URL      = {folder_url}")
+    print(f"   DATA_RAW        = {data_raw}")
+    print(f"   DATA_PROCESSED  = {data_processed}")
+    print("   CIDADES:")
+    for c, v in flags_cidades.items():
+        status = "MANTER" if v else "REMOVER"
+        print(f"      - {c}: {status}")
+
+    pdfs = baixar_pdfs(folder_url, data_raw)
+
     if not pdfs:
-        print("[ERRO] Nenhum arquivo PDF foi encontrado no Drive do Brasil Atacarejo.", file=sys.stderr)
-        return []
-    
-    manter = [p for p in pdfs if PADRAO_CIDADE.search(p.name)]
+        print("[ERRO] Nenhum PDF foi baixado do Drive.")
+        return
+
+    manter = [p for p in pdfs if deve_manter_pdf(p.name, flags_cidades)]
     remover = [p for p in pdfs if p not in manter]
 
     for p in remover:
-        try:
-            p.unlink(missing_ok=True)
-            print(f"[REMOVIDO] {p.name}")
-        except Exception as e:
-            print(f"[AVISO] Não foi possível remover {p.name}: {e}", file=sys.stderr)
-    
+        print(f"[REMOVIDO] {p.name}")
+        p.unlink(missing_ok=True)
+
     if not manter:
-        print("[ERRO] Nenhum PDF de BRUMADO ou VITÓRIA DA CONQUISTA foi encontrado.", file=sys.stderr)
-        return []
+        print("[ERRO] Não há PDFs correspondentes às cidades marcadas como TRUE:")
+        for c in cidades_ativas:
+            print(f"   - {c}")
+        return
 
-    return manter
+    print("\n[INFO] PDFs mantidos:")
+    for p in manter:
+        print(f"   - {p.name}")
 
-def run_download_and_convert() -> List[Path]:
-    """
-    Função principal do pipeline:
-    - baixa PDFs
-    - converte para PNG
-    - retorna lista de PNGs gerados
-    """
-    pdfs = baixar_pdfs_brasil_atacarejo()
-    if not pdfs:
-        return []
-    
-    DATA_PROCESSED.mkdir(parents=True, exist_ok=True)
+    print("\n[INFO] Convertendo PDFs para PNG...")
+    data_processed.mkdir(parents=True, exist_ok=True)
 
-    todos_pngs: List[Path] = []
-    for pdf in pdfs:
-        print(f"[INFO] Convertendo {p.name} para PNG...")
-        pngs = converter_pdf_para_png(pdf, DATA_PROCESSED)
-        todos_pngs.extend(pngs)
-    
-    print("\n[FINALIZADO] Todos os folhetos foram baixados e convertidos.")
-    return todos_pngs
+    for pdf in manter:
+        converter_pdf_para_png(pdf, data_processed)
 
-def main() -> None:
-    pngs = run_download_and_convert()
-    if not pngs:
-        sys.exit(1)
+    print("\n[FINALIZADO] Processo concluído.")
 
 if __name__ == "__main__":
-    main()
+    run()

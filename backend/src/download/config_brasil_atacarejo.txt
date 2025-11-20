@@ -1,0 +1,10 @@
+FOLDER_URL=https://drive.google.com/drive/folders/1mzp4QQj7Ep1GRvjy4tRHbLfqu-_Ts7Ns
+
+DATA_RAW=backend/data/raw/brasil_atacarejo
+DATA_PROCESSED=backend/data/processed/brasil_atacarejo
+
+BRUMADO=TRUE
+VITÓRIA DA CONQUISTA=TRUE
+CAMPINA GRANDE=FALSE
+JOÃO PESSOA=FALSE
+JUAZEIRO DO NORTE=FALSE
