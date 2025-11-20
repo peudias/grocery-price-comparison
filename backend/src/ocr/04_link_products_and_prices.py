@@ -119,7 +119,7 @@ def main():
     with ocr_csv.open("r", encoding="utf-8") as f:
         reader = csv.DictReader(f)
         for row in reader:
-            image_name = row["image"]
+            image_name = row["orig_image"]
             by_image.setdefault(image_name, []).append(row)
 
     num_products = 0
