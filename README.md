@@ -13,3 +13,7 @@ source venv/bin/activate
 ```
 python3 -m pip install -r backend/requirements.txt
 ```
+
+```
+python3 backend/src/app.py
+```
