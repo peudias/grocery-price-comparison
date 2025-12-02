@@ -87,6 +87,12 @@ def converter_pdf_para_png(pdf_path: Path, pasta_destino: Path) -> List[Path]:
     for i, img in enumerate(imagens, start=1):
         nome_png = pdf_path.stem + f"_p{i}.png"
         destino = pasta_destino / nome_png
+
+        if destino.exists():
+            print(f"[SKIP] PNG já existe, pulando: {destino}")
+            saidas.append(destino)
+            continue
+
         img.save(destino, "PNG")
         print(f"[OK] Gerado: {destino}")
         saidas.append(destino)
@@ -128,14 +134,22 @@ def run():
         status = "MANTER" if v else "REMOVER"
         print(f"      - {c}: {status}")
 
-    pdfs = baixar_pdfs(folder_url, data_raw)
+    # 1) Baixar NOVOS PDFs (se houver)
+    pdfs_novos = baixar_pdfs(folder_url, data_raw)
 
-    if not pdfs:
-        print("[ERRO] Nenhum PDF foi baixado do Drive.")
+    if not pdfs_novos:
+        print("[AVISO] Nenhum PDF novo foi baixado. Usando apenas os PDFs já existentes na pasta raw.")
+
+    # 2) Agora considerar TODOS os PDFs presentes em data_raw
+    todos_pdfs = list(data_raw.glob("*.pdf"))
+
+    if not todos_pdfs:
+        print("[ERRO] Não há nenhum PDF na pasta raw (mesmo após o download).")
         return
 
-    manter = [p for p in pdfs if deve_manter_pdf(p.name, flags_cidades)]
-    remover = [p for p in pdfs if p not in manter]
+    # 3) Aplicar as flags de cidades em cima de TODOS os PDFs
+    manter = [p for p in todos_pdfs if deve_manter_pdf(p.name, flags_cidades)]
+    remover = [p for p in todos_pdfs if p not in manter]
 
     for p in remover:
         print(f"[REMOVIDO] {p.name}")
@@ -147,11 +161,11 @@ def run():
             print(f"   - {c}")
         return
 
-    print("\n[INFO] PDFs mantidos:")
+    print("\n[INFO] PDFs mantidos (após filtro por cidade):")
     for p in manter:
         print(f"   - {p.name}")
 
-    print("\n[INFO] Convertendo PDFs para PNG...")
+    print("\n[INFO] Convertendo PDFs para PNG (TODOS os mantidos)...")
     data_processed.mkdir(parents=True, exist_ok=True)
 
     for pdf in manter:
