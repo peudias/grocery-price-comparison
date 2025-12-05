@@ -4,3 +4,4 @@ Pillow
 pytesseract
 ultralytics>=8.3.0
 opencv-python
+matplotlib

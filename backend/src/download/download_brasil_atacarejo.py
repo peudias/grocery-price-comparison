@@ -5,7 +5,7 @@ import sys
 import gdown
 from pdf2image import convert_from_path
 
-CONFIG_PATH = Path("backend/src/download/config_brasil_atacarejo.txt")
+CONFIG_PATH = Path("backend/data/configs/config_brasil_atacarejo.txt")
 
 # 1. Leitura do arquivo de configuração (geral + cidades)
 def carregar_config(config_path: Path) -> Tuple[str, Path, Path, Dict[str, bool]]:
