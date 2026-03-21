@@ -62,14 +62,16 @@ def parse_price(text: str):
 
 def main():
     backend_dir = Path(__file__).resolve().parents[2]
+    SUPERMERCADO = "assai"
 
-    base_results = backend_dir / "data" / "results" / "yolo11"
+    base_results = backend_dir / "data" / "results" / SUPERMERCADO / "yolo11"
     input_csv = base_results / "products_prices.csv"
     output_csv = base_results / "products_prices_fixed.csv"
 
     if not input_csv.exists():
         raise FileNotFoundError(f"Arquivo não encontrado: {input_csv}")
 
+    print(f"Supermercado: {SUPERMERCADO}")
     print(f"Lendo preços de: {input_csv}")
     print(f"Salvando CSV corrigido em: {output_csv}")
 

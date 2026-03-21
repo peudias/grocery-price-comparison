@@ -23,12 +23,14 @@ def clean_product_name(text: str) -> str:
 
 def main():
     backend_dir = Path(__file__).resolve().parents[2]
-    base_results = backend_dir / "data" / "results" / "yolo11"
+    SUPERMERCADO = "assai"
+    base_results = backend_dir / "data" / "results" / SUPERMERCADO / "yolo11"
 
     input_csv = base_results / "products_prices_enriched.csv"
     if not input_csv.exists():
         raise FileNotFoundError(f"Arquivo não encontrado: {input_csv}")
 
+    print(f"Supermercado: {SUPERMERCADO}")
     print(f"Lendo dados enriquecidos de: {input_csv}")
 
     branch_period_stats_csv = base_results / "analysis_branch_period_stats.csv"

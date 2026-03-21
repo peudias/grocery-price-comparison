@@ -9,6 +9,10 @@ PATTERN = re.compile(
     r"BRASIL ATACAREJO - (.+) (\d{2}\.\d{2}) A (\d{2}\.\d{2})"
 )
 
+PATTERN_ASSAI = re.compile(
+    r"ASSAI (\d{4}) - (\d{2}\.\d{2}) A (\d{2}\.\d{2})"
+)
+
 def parse_image_metadata(image_name: str):
     """
     Recebe algo como:
@@ -26,10 +30,28 @@ def parse_image_metadata(image_name: str):
     city, start, end = m.groups()
     return city, start, end
 
+def parse_image_metadata_assai(image_name: str):
+    """
+    Recebe algo como:
+      'ASSAI 2025 - 01.11 A 04.11_p1.png'
+    Retorna:
+      year, data_inicio_str, data_fim_str
+
+    Exemplo:
+      ('2025', '01.11', '04.11')
+    """
+    base = image_name.rsplit("_p", 1)[0]
+    m = PATTERN_ASSAI.match(base)
+    if not m:
+        return None, None, None
+    year, start, end = m.groups()
+    return year, start, end
+
 
 def main():
     backend_dir = Path(__file__).resolve().parents[2]
-    base_results = backend_dir / "data" / "results" / "yolo11"
+    SUPERMERCADO = "assai"
+    base_results = backend_dir / "data" / "results" / SUPERMERCADO / "yolo11"
 
     input_csv = base_results / "products_prices_fixed.csv"
     output_csv = base_results / "products_prices_enriched.csv"
@@ -37,6 +59,7 @@ def main():
     if not input_csv.exists():
         raise FileNotFoundError(f"Arquivo de entrada não encontrado: {input_csv}")
 
+    print(f"Supermercado: {SUPERMERCADO}")
     print(f"Lendo dados de: {input_csv}")
     print(f"Gerando CSV enriquecido em: {output_csv}")
 
@@ -55,7 +78,7 @@ def main():
             total += 1
             image_name = row.get("image", "")
 
-            branch, start, end = parse_image_metadata(image_name)
+            branch, start, end = parse_image_metadata_assai(image_name)
 
             if branch is None:
                 sem_meta += 1

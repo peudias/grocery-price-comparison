@@ -67,7 +67,8 @@ FIXED_BRANCH_COLORS = {
 # -------------------------------------------------------------------------
 def main():
     backend_dir = Path(__file__).resolve().parents[2]
-    base_results = backend_dir / "data" / "results" / "yolo11"
+    SUPERMERCADO = "assai"
+    base_results = backend_dir / "data" / "results" / SUPERMERCADO / "yolo11"
 
     # Entrada: arquivo gerado pelo 09_filter_products_for_report.py
     in_dir = base_results / "filter_products_for_report"

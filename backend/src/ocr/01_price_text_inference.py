@@ -12,6 +12,8 @@ except ImportError:
 def main():
     backend_dir = Path(__file__).resolve().parents[2]
 
+    SUPERMERCADO = "assai"
+
     model_path = (
         backend_dir
         / "data"
@@ -22,15 +24,16 @@ def main():
         / "best.pt"
     )
 
-    input_dir = backend_dir / "data" / "processed" / "brasil_atacarejo"
+    input_dir = backend_dir / "data" / "processed" / SUPERMERCADO
 
-    output_vis_dir = backend_dir / "data" / "results" / "yolo11" / "predictions_vis"
+    output_vis_dir = backend_dir / "data" / "results" / SUPERMERCADO / "yolo11" / "predictions_vis"
     output_vis_dir.mkdir(parents=True, exist_ok=True)
 
-    output_csv = backend_dir / "data" / "results" / "yolo11" / "detections_price_text.csv"
+    output_csv = backend_dir / "data" / "results" / SUPERMERCADO / "yolo11" / "detections_price_text.csv"
     output_csv.parent.mkdir(parents=True, exist_ok=True)
 
     print(f"Carregando modelo de: {model_path}")
+    print(f"Supermercado: {SUPERMERCADO}")
     model = YOLO(str(model_path))
     class_names = model.names
 

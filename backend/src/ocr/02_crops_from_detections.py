@@ -6,17 +6,19 @@ import cv2
 
 def main() -> None:
     backend_dir = Path(__file__).resolve().parents[2]
-    input_dir = backend_dir / "data" / "processed" / "brasil_atacarejo"
+    SUPERMERCADO = "assai"
+    input_dir = backend_dir / "data" / "processed" / SUPERMERCADO
 
     detections_csv = (
         backend_dir
         / "data"
         / "results"
+        / SUPERMERCADO
         / "yolo11"
         / "detections_price_text.csv"
     )
 
-    crops_root = backend_dir / "data" / "results" / "yolo11" / "crops"
+    crops_root = backend_dir / "data" / "results" / SUPERMERCADO / "yolo11" / "crops"
     price_dir = crops_root / "price"
     product_text_dir = crops_root / "product_text"
 
@@ -28,6 +30,7 @@ def main() -> None:
     if not detections_csv.exists():
         raise FileNotFoundError(f"Arquivo de detecções não encontrado: {detections_csv}")
 
+    print(f"[INFO] Supermercado: {SUPERMERCADO}")
     print(f"[INFO] Lendo detecções de: {detections_csv}")
     print(f"[INFO] Salvando crops em: {crops_root}")
     print(f"[INFO] Salvando metadata em: {metadata_csv}")

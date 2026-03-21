@@ -8,14 +8,16 @@ def clean_text(text: str) -> str:
 
 def main():
     backend_dir = Path(__file__).resolve().parents[2]
+    SUPERMERCADO = "assai"
 
-    base_results = backend_dir / "data" / "results" / "yolo11"
+    base_results = backend_dir / "data" / "results" / SUPERMERCADO / "yolo11"
     input_csv = base_results / "products_prices_fixed.csv"
     output_csv = base_results / "products_simple.csv"
 
     if not input_csv.exists():
         raise FileNotFoundError(f"Arquivo de entrada não encontrado: {input_csv}")
 
+    print(f"Supermercado: {SUPERMERCADO}")
     print(f"Lendo dados de: {input_csv}")
     print(f"Gerando CSV simplificado em: {output_csv}")
 

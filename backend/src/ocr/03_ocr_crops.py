@@ -63,8 +63,9 @@ def ocr_product_text(image_path: Path) -> str:
 
 def main():
     backend_dir = Path(__file__).resolve().parents[2]
+    SUPERMERCADO = "assai"
 
-    crops_root = backend_dir / "data" / "results" / "yolo11" / "crops"
+    crops_root = backend_dir / "data" / "results" / SUPERMERCADO / "yolo11" / "crops"
     metadata_csv = crops_root / "crops_metadata.csv"
 
     if not metadata_csv.exists():
@@ -80,6 +81,7 @@ def main():
 
     ocr_csv = crops_root / "crops_ocr.csv"
 
+    print(f"Supermercado: {SUPERMERCADO}")
     print(f"Lendo metadata: {metadata_csv}")
     print(f"Salvando OCR em: {ocr_csv}")
 

@@ -35,6 +35,13 @@ def pipeline_brasil_atacarejo() -> None:
     )
     run_ocr_pipeline()
 
+def pipeline_assai() -> None:
+    run_script(
+        "Converter PDFs dos folhetos do Assaí",
+        "download/convert_assai.py",
+    )
+    run_ocr_pipeline()
 
 if __name__ == "__main__":
-    pipeline_brasil_atacarejo()
+    pipeline_assai()
+    #pipeline_brasil_atacarejo()

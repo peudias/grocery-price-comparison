@@ -102,15 +102,17 @@ def build_price_columns(prices, max_gap_x=200.0):
 
 def main():
     backend_dir = Path(__file__).resolve().parents[2]
+    SUPERMERCADO = "assai"
 
-    crops_root = backend_dir / "data" / "results" / "yolo11" / "crops"
+    crops_root = backend_dir / "data" / "results" / SUPERMERCADO / "yolo11" / "crops"
     ocr_csv = crops_root / "crops_ocr.csv"
     if not ocr_csv.exists():
         raise FileNotFoundError(f"Arquivo de OCR não encontrado: {ocr_csv}")
 
-    output_csv = backend_dir / "data" / "results" / "yolo11" / "products_prices.csv"
+    output_csv = backend_dir / "data" / "results" / SUPERMERCADO / "yolo11" / "products_prices.csv"
     output_csv.parent.mkdir(parents=True, exist_ok=True)
 
+    print(f"Supermercado: {SUPERMERCADO}")
     print(f"Lendo OCR de: {ocr_csv}")
     print(f"Salvando associações em: {output_csv}")
 

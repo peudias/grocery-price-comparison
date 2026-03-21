@@ -64,7 +64,8 @@ def load_target_products(target_file: Path):
 
 def main():
     backend_dir = Path(__file__).resolve().parents[2]
-    base_results = backend_dir / "data" / "results" / "yolo11"
+    SUPERMERCADO = "assai"
+    base_results = backend_dir / "data" / "results" / SUPERMERCADO / "yolo11"
     base_configs = backend_dir / "data" / "configs"
 
     # Entrada 1: CSV enriquecido (linhas brutas)
@@ -97,6 +98,7 @@ def main():
     # -------------------------------------------------------------------------
     # 1) FILTRO NAS LINHAS BRUTAS (products_prices_enriched.csv)
     # -------------------------------------------------------------------------
+    print(f"Supermercado: {SUPERMERCADO}")
     print(f"[INFO] Lendo dados brutos de: {input_csv}")
 
     rows = []
